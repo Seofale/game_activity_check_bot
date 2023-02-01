@@ -20,8 +20,11 @@ class MemberDb(Base):
     __tablename__ = 'members_db'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    member_id: Mapped[int]
-    guild_id: Mapped[int] = mapped_column(ForeignKey("guilds_db.id"))
+    member_id: Mapped[int] = mapped_column(unique=True)
+    guild_id: Mapped[int] = mapped_column(
+        ForeignKey("guilds_db.id"),
+        nullable=True
+    )
     game_sessions: Mapped[list[GameSession]] = relationship()
 
 

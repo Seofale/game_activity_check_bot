@@ -2,7 +2,10 @@ import datetime
 from datetime import timezone
 
 import discord
+from db.engine import async_session
+from db.models import MemberDb
 from discord.ext import commands
+from sqlalchemy import select
 from utils import get_index_safe
 
 
@@ -18,6 +21,15 @@ class ActivityCheckCog(commands.Cog):
         before: discord.Member,
         after: discord.Member
     ) -> None:
+
+        async with async_session() as session:
+            sql = select(MemberDb).where(
+                MemberDb.member_id == before.id)
+            result = await session.execute(sql)
+            member_in_track = result.scalar()
+
+        if not member_in_track:
+            return
 
         system_channel = before.guild.system_channel
         gaming_type = discord.ActivityType.playing

@@ -1,9 +1,12 @@
+import asyncio
+
 import discord
 from cogs.activity_check import ActivityCheckCog
+from cogs.commands import CommandsCog
 from cogs.welcome import WelcomeCog
-from discord.ext import commands
-
 from config import load_config
+from discord.ext import commands
+from db.engine import create_db_tables
 
 
 class CustomBot(commands.Bot):
@@ -15,7 +18,17 @@ intents = discord.Intents().all()
 
 config = load_config()
 
-bot = CustomBot(command_prefix='!', intents=intents)
-bot.add_cog(WelcomeCog(bot))
-bot.add_cog(ActivityCheckCog(bot))
-bot.run(config.bot.token)
+
+async def main():
+
+    await create_db_tables()
+
+    bot = CustomBot(command_prefix='!', intents=intents)
+    bot.add_cog(WelcomeCog(bot))
+    bot.add_cog(ActivityCheckCog(bot))
+    bot.remove_command("help")
+    bot.add_cog(CommandsCog(bot))
+    await bot.start(config.bot.token)
+
+
+asyncio.run(main())

@@ -10,14 +10,6 @@ class WelcomeCog(commands.Cog):
         super().__init__()
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
-        if message.author == self.bot.user:
-            return
-
-        if message.guild not in self.bot.guilds:
-            await message.channel.send(constants.DONT_ANSWER_IN_PM)
-
-    @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
 
         if member.dm_channel:
