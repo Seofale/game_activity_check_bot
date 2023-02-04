@@ -2,10 +2,8 @@ import datetime
 from datetime import timezone
 
 import discord
-from db.engine import async_session
-from db.models import MemberDb
+from db.repositories import MemberRepository, GameSessionRepository
 from discord.ext import commands
-from sqlalchemy import select
 from utils import get_index_safe
 
 
@@ -22,16 +20,10 @@ class ActivityCheckCog(commands.Cog):
         after: discord.Member
     ) -> None:
 
-        async with async_session() as session:
-            sql = select(MemberDb).where(
-                MemberDb.member_id == before.id)
-            result = await session.execute(sql)
-            member_in_track = result.scalar()
-
+        member_in_track = await MemberRepository.get_member(before.id)
         if not member_in_track:
             return
 
-        system_channel = before.guild.system_channel
         gaming_type = discord.ActivityType.playing
 
         before_game = get_index_safe(
@@ -48,9 +40,7 @@ class ActivityCheckCog(commands.Cog):
             return
 
         if not before_game and after_game:
-            await system_channel.send(
-                f"{after.name} начал играть в {after_game.name}"
-            )
+            print(f"{after.name} начал играть в {after_game.name}")
 
         if before_game and not after_game:
             gaming_time = str(
@@ -58,14 +48,16 @@ class ActivityCheckCog(commands.Cog):
                 before_game.start
             )
 
-            await system_channel.send(
-                f"{after.name} закончил играть в {before_game.name}, \
-                он играл в неё {gaming_time}"
+            await GameSessionRepository.create_session(
+                member_id=before.id,
+                duration=gaming_time
             )
 
+            print(f"{after.name} закончил играть в {before_game.name}, \
+                он играл в неё {gaming_time}")
+
         if before_game and after_game:
-            await system_channel.send(
-                f"{after.name} изменил игру на {after_game.name}, \
+
+            print(f"{after.name} изменил игру на {after_game.name}, \
                 он играл в {before_game.name} \
-                {before_game.end - before_game.start}"
-            )
+                {before_game.end - before_game.start}")

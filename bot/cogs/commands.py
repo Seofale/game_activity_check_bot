@@ -1,8 +1,6 @@
 import constants
-from db.engine import async_session
-from db.models import MemberDb
+from db.repositories.member_repository import MemberRepository
 from discord.ext import commands
-from sqlalchemy import delete
 
 
 class CommandsCog(commands.Cog):
@@ -23,9 +21,9 @@ class CommandsCog(commands.Cog):
         if ctx.guild not in self.bot.guilds:
             return
 
-        async with async_session() as session:
-            await session.merge(MemberDb(member_id=ctx.author.id))
-            await session.commit()
+        await MemberRepository.create_member(
+            ctx.author.id, ctx.guild.id
+        )
 
         if ctx.author.dm_channel:
             await ctx.author.dm_channel.send(constants.TRACK_ADDED)
@@ -34,15 +32,14 @@ class CommandsCog(commands.Cog):
         await ctx.author.create_dm()
         await ctx.author.dm_channel.send(constants.TRACK_ADDED)
 
+        await ctx.message.delete(delay=2.0)
+
     @commands.command()
     async def end_track(self, ctx: commands.Context) -> None:
         if ctx.guild not in self.bot.guilds:
             return
 
-        sql = delete(MemberDb).where(MemberDb.member_id == ctx.author.id)
-        async with async_session() as session:
-            await session.execute(sql)
-            await session.commit()
+        await MemberRepository.delete_member(ctx.author.id)
 
         if ctx.author.dm_channel:
             await ctx.author.dm_channel.send(constants.TRACK_REMOVED)
@@ -50,3 +47,5 @@ class CommandsCog(commands.Cog):
 
         await ctx.author.create_dm()
         await ctx.author.dm_channel.send(constants.TRACK_REMOVED)
+
+        await ctx.message.delete(delay=2.0)

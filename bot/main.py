@@ -5,8 +5,8 @@ from cogs.activity_check import ActivityCheckCog
 from cogs.commands import CommandsCog
 from cogs.welcome import WelcomeCog
 from config import load_config
-from discord.ext import commands
 from db.engine import create_db_tables
+from discord.ext import commands
 
 
 class CustomBot(commands.Bot):

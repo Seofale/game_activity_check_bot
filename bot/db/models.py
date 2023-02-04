@@ -12,17 +12,16 @@ class GameSession(Base):
     __tablename__ = 'game_session'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    member_id: Mapped[int] = mapped_column(ForeignKey("members_db.id"))
+    member_id: Mapped[int] = mapped_column(ForeignKey("members_db.member_id"))
     duration: Mapped[datetime.timedelta]
 
 
 class MemberDb(Base):
     __tablename__ = 'members_db'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    member_id: Mapped[int] = mapped_column(unique=True)
+    member_id: Mapped[int] = mapped_column(primary_key=True)
     guild_id: Mapped[int] = mapped_column(
-        ForeignKey("guilds_db.id"),
+        ForeignKey("guilds_db.guild_id"),
         nullable=True
     )
     game_sessions: Mapped[list[GameSession]] = relationship()
@@ -31,6 +30,5 @@ class MemberDb(Base):
 class GuildDb(Base):
     __tablename__ = "guilds_db"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    guild_id: Mapped[int]
+    guild_id: Mapped[int] = mapped_column(primary_key=True)
     members: Mapped[list[MemberDb]] = relationship()
