@@ -1,2 +1,3 @@
 from .gamesession_repository import GameSessionRepository
 from .member_repository import MemberRepository
+from .guild_repository import GuildRepository
