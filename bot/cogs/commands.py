@@ -1,3 +1,5 @@
+import logging
+
 import constants
 from db.repositories.member_repository import MemberRepository
 from discord.ext import commands
@@ -25,14 +27,14 @@ class CommandsCog(commands.Cog):
             ctx.author.id, ctx.guild.id
         )
 
+        await ctx.message.delete(delay=2.0)
+
         if ctx.author.dm_channel:
             await ctx.author.dm_channel.send(constants.TRACK_ADDED)
             return
 
         await ctx.author.create_dm()
         await ctx.author.dm_channel.send(constants.TRACK_ADDED)
-
-        await ctx.message.delete(delay=2.0)
 
     @commands.command()
     async def end_track(self, ctx: commands.Context) -> None:
@@ -41,11 +43,11 @@ class CommandsCog(commands.Cog):
 
         await MemberRepository.delete_member(ctx.author.id)
 
+        await ctx.message.delete(delay=2.0)
+
         if ctx.author.dm_channel:
             await ctx.author.dm_channel.send(constants.TRACK_REMOVED)
             return
 
         await ctx.author.create_dm()
         await ctx.author.dm_channel.send(constants.TRACK_REMOVED)
-
-        await ctx.message.delete(delay=2.0)

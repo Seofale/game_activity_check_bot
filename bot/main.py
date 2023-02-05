@@ -1,7 +1,8 @@
 import asyncio
+import logging
 
 import discord
-from cogs.activity_check import ActivityCheckCog
+from cogs.listener import ListenerCog
 from cogs.commands import CommandsCog
 from cogs.welcome import WelcomeCog
 from config import load_config
@@ -19,15 +20,24 @@ intents = discord.Intents().all()
 config = load_config()
 
 
+def add_cogs(bot: commands.Bot) -> None:
+    bot.remove_command("help")
+    bot.add_cog(WelcomeCog(bot))
+    bot.add_cog(ListenerCog(bot))
+    bot.add_cog(CommandsCog(bot))
+
+
 async def main():
+    logging.basicConfig(
+        level="INFO",
+        format="%(asctime)s - %(levelname)s - %(message)s"
+    )
 
     await create_db_tables()
 
     bot = CustomBot(command_prefix='!', intents=intents)
-    bot.add_cog(WelcomeCog(bot))
-    bot.add_cog(ActivityCheckCog(bot))
-    bot.remove_command("help")
-    bot.add_cog(CommandsCog(bot))
+    add_cogs(bot)
+
     await bot.start(config.bot.token)
 
 
